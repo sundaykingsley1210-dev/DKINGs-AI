@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast'
 import { useSettingsStore } from '@/store/settingsStore'
 import { useEffect } from 'react'
 import Layout from '@/components/Layout/Layout'
+import InstallPrompt from '@/components/InstallPrompt'
 import ChatPage from '@/pages/ChatPage'
 import CodePage from '@/pages/CodePage'
 import CreativePage from '@/pages/CreativePage'
@@ -42,6 +43,7 @@ export default function App() {
           duration: 3000,
         }}
       />
+      <InstallPrompt />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
