@@ -1,12 +1,19 @@
-const CACHE_NAME = 'dkings-ai-v1'
-const STATIC_CACHE = 'dkings-static-v1'
-const DYNAMIC_CACHE = 'dkings-dynamic-v1'
+const CACHE_NAME = 'dkings-ai-v2'
+const STATIC_CACHE = 'dkings-static-v2'
+const DYNAMIC_CACHE = 'dkings-dynamic-v2'
 
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/dkings-logo.svg',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
+  '/icons/icon-96.png',
+  '/icons/icon-128.png',
+  '/icons/icon-144.png',
+  '/icons/icon-152.png',
+  '/icons/icon-384.png',
 ]
 
 self.addEventListener('install', (event) => {
@@ -33,10 +40,8 @@ self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
 
-  // Skip non-GET requests
   if (request.method !== 'GET') return
 
-  // Skip API calls and external resources
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/uploads/')) {
     event.respondWith(
       fetch(request).catch(() =>
@@ -46,7 +51,6 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Network-first for navigation
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -60,7 +64,6 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // Cache-first for static assets
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached

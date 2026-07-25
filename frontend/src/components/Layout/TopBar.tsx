@@ -1,8 +1,9 @@
-import { FiMenu, FiSun, FiMoon, FiUser, FiMonitor } from 'react-icons/fi'
+import { FiMenu, FiSun, FiMoon, FiUser, FiMonitor, FiDownload } from 'react-icons/fi'
 import { useSettingsStore } from '@/store/settingsStore'
 import { useNavigate } from 'react-router-dom'
 import { useChatStore } from '@/store/chatStore'
 import { useProjectStore } from '@/store/projectStore'
+import { useInstall } from '@/hooks/useInstall'
 import type { AIMode } from '@/types'
 
 const modeLabels: Record<AIMode, string> = {
@@ -21,6 +22,7 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
   const navigate = useNavigate()
   const activeConversation = useChatStore((s) => s.getActiveConversation())
   const activeProject = useProjectStore((s) => s.getActiveProject())
+  const { canInstall, isInstalled, isIOS, install } = useInstall()
 
   const cycleTheme = () => {
     const themes = ['light', 'dark', 'system'] as const
@@ -65,6 +67,17 @@ export default function TopBar({ onToggleSidebar }: TopBarProps) {
         <button onClick={cycleTheme} className="btn-ghost p-1.5" title={`Theme: ${theme}`}>
           <ThemeIcon size={18} />
         </button>
+
+        {!isInstalled && (canInstall || isIOS) && (
+          <button
+            onClick={() => isIOS ? navigate('/download') : install()}
+            className="flex items-center gap-1 bg-primary-600 hover:bg-primary-700 text-white text-xs font-medium px-2.5 py-1.5 rounded-lg transition-colors"
+            title="Install App"
+          >
+            <FiDownload size={14} />
+            <span className="hidden sm:inline">Install</span>
+          </button>
+        )}
 
         <button
           onClick={() => navigate('/settings')}

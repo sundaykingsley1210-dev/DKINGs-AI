@@ -1,5 +1,7 @@
 import { useSettingsStore } from '@/store/settingsStore'
-import { FiSun, FiMoon, FiMonitor, FiSave, FiUser, FiVolume2, FiCode } from 'react-icons/fi'
+import { FiSun, FiMoon, FiMonitor, FiSave, FiUser, FiVolume2, FiCode, FiDownload } from 'react-icons/fi'
+import { useNavigate } from 'react-router-dom'
+import { useInstall } from '@/hooks/useInstall'
 import toast from 'react-hot-toast'
 
 export default function SettingsPage() {
@@ -10,6 +12,8 @@ export default function SettingsPage() {
     autoSave, setAutoSave,
     codeTheme, setCodeTheme,
   } = useSettingsStore()
+  const navigate = useNavigate()
+  const { canInstall, isInstalled, isInstalling, install } = useInstall()
 
   const themes = [
     { id: 'light' as const, label: 'Light', icon: FiSun },
@@ -170,6 +174,64 @@ export default function SettingsPage() {
                 />
               </button>
             </div>
+          </div>
+        </section>
+
+        {/* Install App */}
+        <section className="card">
+          <h2 className="text-lg font-semibold text-surface-900 dark:text-white mb-4 flex items-center gap-2">
+            <FiDownload size={18} />
+            Install App
+          </h2>
+          <div className="space-y-4">
+            {isInstalled ? (
+              <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+                  <FiDownload size={18} className="text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-green-700 dark:text-green-400">DKINGs AI is Installed!</h3>
+                  <p className="text-xs text-green-600/70 dark:text-green-400/70">You're using the installed app</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-surface-500">
+                  Install DKINGs AI on your device for the best experience. Get offline access, faster loading, and a native app feel.
+                </p>
+                {canInstall ? (
+                  <button
+                    onClick={async () => {
+                      const success = await install()
+                      if (success) toast.success('App installed successfully!')
+                      else toast.error('Installation cancelled')
+                    }}
+                    disabled={isInstalling}
+                    className="w-full btn-primary flex items-center justify-center gap-2"
+                  >
+                    {isInstalling ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Installing...
+                      </>
+                    ) : (
+                      <>
+                        <FiDownload size={18} />
+                        Install Now
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => navigate('/download')}
+                    className="w-full btn-primary flex items-center justify-center gap-2"
+                  >
+                    <FiDownload size={18} />
+                    View Install Instructions
+                  </button>
+                )}
+              </>
+            )}
           </div>
         </section>
 
