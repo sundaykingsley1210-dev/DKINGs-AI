@@ -123,7 +123,7 @@ function getFallbackResponse(messages: any[]): string {
   if (sysMsg.includes('Avery Search')) {
     return `## Search Results\n\nI can help you find information. The AI API is being configured.\n\n**Your query:** ${userMsg.slice(0, 200)}\n\nSet \`OPENAI_API_KEY\` in Vercel for intelligent search.`
   }
-  if (sysMsg.includes('Question Solver') || sysMsg.includes('question')) {
+  if (sysMsg.includes('Question Solver')) {
     return `## Question Solver\n\nI can solve questions from images. The AI API is being configured.\n\nSet \`OPENAI_API_KEY\` in Vercel for AI-powered question solving with OCR and vision.`
   }
   return `## Avery AI\n\nHello! I'm Avery AI, your intelligent assistant.\n\n**Your message:** ${userMsg.slice(0, 200)}\n\nThe AI API key is being configured. Set \`OPENAI_API_KEY\` in Vercel environment variables for full AI responses.`
@@ -179,14 +179,44 @@ app.post('/api/chat/stream', async (req: any, res) => {
     res.flushHeaders()
 
     const systemPrompt = buildSystemPrompt(mode, context)
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content },
+    ]
+
+    if (!OPENAI_API_KEY) {
+      const fallback = getFallbackResponse(messages)
+      res.write(`data: ${JSON.stringify({ content: fallback, done: false })}\n\n`)
+      res.write(`data: ${JSON.stringify({ content: '', done: true })}\n\n`)
+      res.end()
+      return
+    }
 
     try {
-      const stream = await callOpenAI([
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content },
-      ], true) as Response
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages,
+          temperature: 0.7,
+          max_tokens: 4096,
+          stream: true,
+        }),
+      })
 
-      const reader = stream.body?.getReader()
+      if (!response.ok) {
+        const fallback = getFallbackResponse(messages)
+        res.write(`data: ${JSON.stringify({ content: fallback, done: false })}\n\n`)
+        res.write(`data: ${JSON.stringify({ content: '', done: true })}\n\n`)
+        res.end()
+        return
+      }
+
+      const reader = response.body?.getReader()
       const decoder = new TextDecoder()
 
       if (reader) {
@@ -206,10 +236,7 @@ app.post('/api/chat/stream', async (req: any, res) => {
         }
       }
     } catch (streamError: any) {
-      const fallback = await callOpenAI([
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content },
-      ])
+      const fallback = getFallbackResponse(messages)
       res.write(`data: ${JSON.stringify({ content: fallback, done: false })}\n\n`)
     }
 
