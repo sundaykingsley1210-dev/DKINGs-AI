@@ -78,30 +78,36 @@ async function callOpenAI(messages: any[], stream = false): Promise<any> {
     return getFallbackResponse(messages)
   }
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages,
-      temperature: 0.7,
-      max_tokens: 4096,
-      stream,
-    }),
-  })
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages,
+        temperature: 0.7,
+        max_tokens: 4096,
+        stream,
+      }),
+    })
 
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}))
-    throw new Error(err.error?.message || `OpenAI API error: ${response.status}`)
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}))
+      console.error('OpenAI API error:', response.status, err.error?.message)
+      return getFallbackResponse(messages)
+    }
+
+    if (stream) return response
+
+    const data = await response.json()
+    return data.choices[0]?.message?.content || ''
+  } catch (error: any) {
+    console.error('OpenAI fetch error:', error.message)
+    return getFallbackResponse(messages)
   }
-
-  if (stream) return response
-
-  const data = await response.json()
-  return data.choices[0]?.message?.content || ''
 }
 
 function getFallbackResponse(messages: any[]): string {

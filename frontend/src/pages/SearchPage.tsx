@@ -64,7 +64,7 @@ export default function SearchPage() {
       const errorMsg = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `I encountered an error while searching. Please make sure the backend server is running and try again.\n\nYou can also try rephrasing your query.`,
+        content: `I encountered an error while searching. Please try again.\n\nYou can also try rephrasing your query.`,
         timestamp: new Date().toISOString(),
       }
       setMessages((prev) => [...prev, errorMsg])
