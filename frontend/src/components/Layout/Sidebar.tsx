@@ -5,7 +5,7 @@ import { useSettingsStore } from '@/store/settingsStore'
 import {
   FiMessageSquare, FiCode, FiImage, FiSearch, FiHelpCircle,
   FiFolder, FiSettings, FiPlus, FiChevronLeft, FiChevronRight,
-  FiTrash2, FiDownload,
+  FiTrash2, FiDownload, FiFilm,
 } from 'react-icons/fi'
 
 const modes = [
@@ -161,6 +161,18 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
         </nav>
 
         <div className="p-3 border-t border-surface-200 dark:border-surface-700 space-y-1">
+          <NavLink
+            to="/video-editor"
+            className={({ isActive }) =>
+              `sidebar-item ${isActive ? 'active' : ''} ${!isOpen ? 'justify-center' : ''}`
+            }
+            onClick={() => {
+              if (window.innerWidth < 1024) onToggle()
+            }}
+          >
+            <FiFilm size={18} />
+            {isOpen && <span className="text-sm">Video Editor</span>}
+          </NavLink>
           <NavLink
             to="/download"
             className={({ isActive }) =>

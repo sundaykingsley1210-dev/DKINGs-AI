@@ -13,6 +13,7 @@ import ProjectsPage from '@/pages/ProjectsPage'
 import ProjectDetailPage from '@/pages/ProjectDetailPage'
 import SettingsPage from '@/pages/SettingsPage'
 import DownloadPage from '@/pages/DownloadPage'
+import VideoEditorPage from '@/pages/VideoEditorPage'
 import LoginPage from '@/pages/LoginPage'
 import RegisterPage from '@/pages/RegisterPage'
 
@@ -48,6 +49,7 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/download" element={<DownloadPage />} />
+        <Route path="/video-editor" element={<VideoEditorPage />} />
         <Route element={<Layout />}>
           <Route path="/" element={<Navigate to="/chat" replace />} />
           <Route path="/chat" element={<ChatPage />} />
